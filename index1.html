@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ultra Modern Carousel Library — Pro</title>
+  <link rel="stylesheet" href="style1.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1 class="title">Modern Content Carousel Library</h1>
+    
+    </header>
+
+    <section class="content">
+      <div class="carousel-wrapper">
+        <!-- Carousel container (target for JS) -->
+        <div id="carousel" class="carousel-container" data-theme="dark" aria-roledescription="carousel"></div>
+
+        <aside class="upload-panel glass">
+          <h3>Add Images</h3>
+
+          <label class="upload-btn">
+            Upload Images
+            <input type="file" id="imageUpload" multiple accept="image/*" />
+          </label>
+
+          <div id="dropArea" class="drop-area" tabindex="0">Drag & Drop Images Here</div>
+
+          <div class="controls-row">
+            <label for="transitionSelect">Transition:</label>
+            <select id="transitionSelect">
+              <option value="slide">Slide</option>
+              <option value="fade">Fade</option>
+              <option value="zoom">Zoom</option>
+            </select>
+          </div>
+
+        </aside>
+      </div>
+    </section
+  </main>
+
+  <script src="scrpt1.js" type="module"></script>
+
+  <script>
+    // Bootstrap example (after module loads)
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('carousel');
+
+      // create instance with options
+      window.carouselInstance = new UltraCarousel(root, {
+        autoplay: true,
+        autoplayDelay: 3000,
+        pauseOnHover: true,
+        loop: true,
+        lazyLoad: true,
+        showThumbnails: true,
+        startIndex: 0,
+        transition: 'slide' // 'slide' | 'fade' | 'zoom'
+      });
+
+      // starter images
+      const defaultImages = [
+        "https://images.unsplash.com/photo-1501769214405-5e86c1d1e7f1?w=1600&q=60&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=60&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=1600&q=60&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1600&q=60&auto=format&fit=crop"
+      ];
+      carouselInstance.setImages(defaultImages);
+
+      // wire upload & drop (UI elements in HTML)
+      const fileInput = document.getElementById('imageUpload');
+      const dropArea = document.getElementById('dropArea');
+      const transitionSelect = document.getElementById('transitionSelect');
+
+      fileInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files || []);
+        for (const f of files) {
+          const url = await fileToDataURL(f);
+          carouselInstance.addImage(url);
+        }
+        fileInput.value = '';
+      });
+
+      ;['dragenter','dragover'].forEach(evt => {
+        dropArea.addEventListener(evt, (ev) => { ev.preventDefault(); dropArea.classList.add('dragover'); });
+      });
+      ;['dragleave','drop'].forEach(evt => {
+        dropArea.addEventListener(evt, (ev) => { ev.preventDefault(); dropArea.classList.remove('dragover'); });
+      });
+      dropArea.addEventListener('drop', async (ev) => {
+        const files = Array.from(ev.dataTransfer.files || []);
+        for (const f of files) {
+          if (!f.type.startsWith('image/')) continue;
+          const url = await fileToDataURL(f);
+          carouselInstance.addImage(url);
+        }
+      });
+
+      transitionSelect.addEventListener('change', (e) => {
+        carouselInstance.setOption('transition', e.target.value);
+      });
+
+      // helper
+      function fileToDataURL(file){
+        return new Promise((resolve,reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
